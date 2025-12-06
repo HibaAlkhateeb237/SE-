@@ -20,9 +20,14 @@ use App\Http\Controllers\AccountController;
 Route::post('register', [AuthController::class,'register']);
 Route::post('login', [AuthController::class,'login']);
 
+Route::post('sendOtp',[AuthController::class, 'sendOtp']);
+Route::post('verify-otp', [AuthController::class, 'verifyOtp']);
+
+
 // Routes محمية بـ Sanctum
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('logout', [AuthController::class,'logout']);
+    Route::post('complete-profile', [AuthController::class, 'completeProfile']);
 });
 
 // -----------------

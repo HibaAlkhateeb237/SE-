@@ -17,6 +17,9 @@ class User extends Authenticatable
         'password',
         'phone',
         'meta',
+        'otp_code',
+        'otp_expires_at',
+        'is_verified',
     ];
 
     protected $hidden = [
