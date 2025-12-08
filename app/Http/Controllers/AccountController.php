@@ -1,52 +1,84 @@
 <?php
+
 namespace App\Http\Controllers;
 
-use App\Models\Account;
+use App\Http\Services\AccountService;
+use App\Http\Requests\AccountStoreRequest;
+use App\Http\Requests\AddChildRequest;
+use App\Http\Responses\ApiResponse;
 use App\Models\AccountType;
-use App\Services\Accounts\AccountLeaf;
-use App\Services\Accounts\AccountComposite;
-use Illuminate\Http\Request;
 
 class AccountController extends Controller
 {
+    public function __construct(
+        protected AccountService $accountService
+    ) {}
+
     public function index()
     {
-        $accounts = Account::whereNull('parent_id')->get();
-        $result = [];
-        foreach ($accounts as $acc) {
-            $composite = new AccountComposite($acc);
-            $result[] = $composite->getDetails();
-        }
-        return response()->json($result);
+        $data = $this->accountService->listTree();
+
+        return ApiResponse::success(
+            'Accounts fetched successfully',
+            $data
+        );
     }
 
-    public function store(Request $request)
+    public function store(AccountStoreRequest $request)
     {
-        $data = $request->validate([
-            'user_id'=>'required|exists:users,id',
-            'account_type_id'=>'required|exists:account_types,id',
-            'parent_id'=>'nullable|exists:accounts,id',
-        ]);
+        $account = $this->accountService->create($request->validated());
 
-        $data['uuid'] = \Illuminate\Support\Str::uuid();
-
-        $account = Account::create($data);
-        return response()->json(['message'=>'Account created','account'=>$account]);
+        return ApiResponse::success(
+            'Account created successfully',
+            $account,
+            201
+        );
     }
 
     public function show($id)
     {
-        $account = Account::findOrFail($id);
-        $composite = $account->children()->exists() ? new AccountComposite($account) : new AccountLeaf($account);
-        return response()->json($composite->getDetails());
+        $data = $this->accountService->show($id);
+
+        return ApiResponse::success(
+            'Account details',
+            $data
+        );
     }
 
-    public function addChild(Request $request, $id)
+    public function addChild(AddChildRequest $request, $id)
     {
-        $parent = Account::findOrFail($id);
-        $child = Account::findOrFail($request->child_id);
-        $composite = new AccountComposite($parent);
-        $composite->add(new AccountLeaf($child));
-        return response()->json(['message'=>'Child account added','parent'=>$composite->getDetails()]);
+        try {
+            $data = $this->accountService->addChild(
+                $id,
+                $request->child_id,
+                auth()->id()
+            );
+
+            return ApiResponse::success(
+                'Child account added successfully',
+                $data
+            );
+
+        } catch (\Exception $e) {
+
+            return ApiResponse::error(
+                $e->getMessage(),
+                [],
+                $e->getCode() ?: 400
+            );
+        }
     }
+    public function indexType()
+    {
+        $types = AccountType::query()
+            ->select('id', 'code', 'name', 'rules')
+            ->get();
+
+        return ApiResponse::success(
+            'Account types fetched successfully',
+            $types
+        );
+    }
+
+
 }

@@ -39,6 +39,8 @@ class AccountLeaf implements AccountComponent
             'uuid' => $this->account->uuid,
             'balance' => $this->account->balance,
             'state' => $this->account->state,
+            'account_type' => $this->account->type?->name,
+            'currency'=>$this->account->currency,
         ];
     }
 }

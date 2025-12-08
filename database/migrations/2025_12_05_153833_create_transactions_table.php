@@ -13,6 +13,8 @@ return new class extends Migration
     {
         Schema::create('transactions', function (Blueprint $table) {
             $table->id(); // bigIncrements -> unsignedBigInteger
+            $table->uuid('tx_id')->unique();
+
             $table->foreignId('account_id')->constrained('accounts')->onDelete('cascade'); // الربط مع accounts
             $table->enum('type', ['deposit','withdrawal','transfer','fee','interest','scheduled']);
             $table->decimal('amount', 20, 4);

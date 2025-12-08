@@ -61,6 +61,9 @@ class AccountComposite implements AccountComponent
             'id' => $this->account->id,
             'uuid' => $this->account->uuid,
             'balance' => $this->getBalance(),
+            'account_type' => $this->account->type?->name,
+            'currency'=>$this->account->currency,
+
             'children' => array_map(fn($c) => $c->getDetails(), $this->children),
         ];
     }

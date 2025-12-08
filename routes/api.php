@@ -38,6 +38,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('accounts', [AccountController::class,'store']);         // إنشاء حساب جديد
     Route::get('accounts/{id}', [AccountController::class,'show']);      // عرض حساب محدد
     Route::post('accounts/{id}/add-child', [AccountController::class,'addChild']); // إضافة حساب فرعي
+    Route::get('/account-types', [AccountController::class, 'indexType']);
 });
 
 // -----------------

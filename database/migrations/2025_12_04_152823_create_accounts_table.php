@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id(); // auto-increment primary key
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->foreignId('account_type_id')->constrained('account_types')->onDelete('restrict');
+            $table->uuid('uuid')->unique();
             $table->unsignedBigInteger('parent_id')->nullable();
             $table->decimal('balance', 20, 4)->default(0);
             $table->string('currency', 3)->default('USD');
