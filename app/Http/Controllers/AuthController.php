@@ -38,7 +38,9 @@ class AuthController extends Controller
             'email'=>$request->email,
             'password'=>Hash::make($request->password),
         ]);
-
+        if (!$user->hasRole('Customer')) {
+            $user->assignRole('Customer');
+        }
         // توليد token جديد
         $token = $user->createToken('auth_token')->plainTextToken;
 
@@ -53,38 +55,46 @@ class AuthController extends Controller
     // تسجيل دخول مستخدم موجود
     public function login(Request $request)
     {
-        $request->validate([
-            'email'=>'required|string|email',
-            'password'=>'required|string'
-        ]);
-
-        $user = User::where('email',$request->email)->first();
-
-        if (!$user || !Hash::check($request->password, $user->password)) {
-            throw ValidationException::withMessages([
-                'email' => ['The provided credentials are incorrect.']
+        try {
+            $request->validate([
+                'email'    => 'required|string|email',
+                'password' => 'required|string'
             ]);
+
+            $user = User::where('email', $request->email)->first();
+
+            if (!$user || !Hash::check($request->password, $user->password)) {
+                return ApiResponse::error('Invalid credentials', [
+                    'email' => 'The provided credentials are incorrect.'
+                ], 422);
+            }
+
+            $token = $user->createToken('auth_token')->plainTextToken;
+
+            return ApiResponse::success('Login successful', [
+                'access_token' => $token,
+                'token_type'   => 'Bearer',
+                'user'         => $user
+            ]);
+
+        } catch (\Exception $e) {
+            return ApiResponse::error('Login failed', ['error' => $e->getMessage()], 500);
         }
-
-        // إنشاء token جديد لكل login
-        $token = $user->createToken('auth_token')->plainTextToken;
-
-        return response()->json([
-            'message'=>'Login successful',
-            'access_token'=>$token,
-            'token_type'=>'Bearer',
-            'user'=>$user
-        ]);
     }
 
-    // تسجيل خروج المستخدم (حذف الـ token الحالي)
+
+
+    // 🔹 Logout
     public function logout(Request $request)
     {
-        $request->user()->currentAccessToken()->delete();
+        try {
+            $request->user()->currentAccessToken()->delete();
 
-        return response()->json([
-            'message'=>'Logged out successfully'
-        ]);
+            return ApiResponse::success('Logged out successfully');
+
+        } catch (\Exception $e) {
+            return ApiResponse::error('Logout failed', ['error' => $e->getMessage()], 500);
+        }
     }
 
 

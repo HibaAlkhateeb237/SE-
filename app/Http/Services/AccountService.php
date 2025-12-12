@@ -62,71 +62,51 @@ class AccountService
 
     public function addChild(int $parentId, int $childId, int $authUserId): array
     {
-        // تحميل الموديلات
+
         $parent = $this->accountRepository->findById($parentId);
         $child = $this->accountRepository->findById($childId);
 
-        // 1) لا تسمح أن يكون نفس الحساب هو الأب والابن
+
         if ($parent->id === $child->id) {
             throw new \Exception('A account cannot be parent of itself', 400);
         }
-//
-//        // 2) صلاحيات: فقط مالك الحساب أو Admin مسموح
-//        if ($parent->user_id !== $authUserId && !$this->userIsAdmin($authUserId)) {
-//            throw new \Exception('Unauthorized', 403);
-//        }
-//
-//        // 3) تحقق أن child لا يملك أب بالفعل (اختياري حسب سياسة النظام)
-//        if ($child->parent_id) {
-//            throw new \Exception('This account already has a parent', 400);
-//        }
 
-        // 4) منع الدورة: إذا كان الـ child هو ancestor للحساب parent،
-        //    ربط child كابن للـ parent سيخلق حلقة.
-//        if ($this->isAncestor($child->id, $parent)) {
-//            throw new \Exception('Cannot attach: this operation would create a circular relationship', 400);
-//        }
 
-        // 5) قم بربط الابن بالأب واحفظ
+
         $child->parent_id = $parent->id;
         $child->save();
 
-        // 6) استخدم composite لإرجاع التفاصيل كما في تصميمك
+
         $composite = new AccountComposite($parent);
-        // reload children from DB for up-to-date data (اختياري)
+
         $parent->refresh();
         $composite = new AccountComposite($parent);
 
         return $composite->getDetails();
     }
 
-    /**
-     * هل candidateAncestorId هو سلف للحساب $node ؟
-     * (نمشي للأعلى من $node.parent حتى null أو نلاقي الـ id)
-     */
-    protected function isAncestor(int $candidateAncestorId, \App\Models\Account $node): bool
-    {
-        $current = $node->parent; // أول أب
 
-        while ($current) {
-            if ($current->id === $candidateAncestorId) {
-                return true;
-            }
-            $current = $current->parent; // استمر بالمشي للأعلى
-        }
-
-        return false;
-    }
-
-    /**
-     * مثال بسيط للتحقق من دور Admin — عدّل حسب تطبيقك (Spatie مثلاً)
-     */
-    protected function userIsAdmin(int $userId): bool
-    {
-        $user = \App\Models\User::find($userId);
-        if (!$user) return false;
-        // إذا تستخدم Spatie:
-        return $user->hasRole('Admin');
-    }
+//    protected function isAncestor(int $candidateAncestorId, \App\Models\Account $node): bool
+//    {
+//        $current = $node->parent;
+//
+//        while ($current) {
+//            if ($current->id === $candidateAncestorId) {
+//                return true;
+//            }
+//            $current = $current->parent;
+//        }
+//
+//        return false;
+//    }
+//
+//
+//    protected function userIsAdmin(int $userId): bool
+//    {
+//        $user = \App\Models\User::find($userId);
+//        if (!$user) return false;
+//        // إذا تستخدم Spatie:
+//        return $user->hasRole('Admin');
+//    }
 
 }
