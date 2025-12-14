@@ -20,10 +20,10 @@ class AdminUserSeeder extends Seeder
         );
 
 
-        $role = Role::firstOrCreate(['name' => 'Admin','guard_name' => 'web']);
+        $role = Role::firstOrCreate(['name' => 'Admin','guard_name' => 'sanctum']);
 
 
-        $admin->assignRole(Role::where('name', 'Admin')->where('guard_name', 'web')->first());
+        $admin->assignRole(Role::where('name', 'Admin')->where('guard_name', 'sanctum')->first());
 
     }
 }

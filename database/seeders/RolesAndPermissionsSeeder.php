@@ -41,15 +41,15 @@ class RolesAndPermissionsSeeder extends Seeder
         foreach ($permissions as $permission) {
             Permission::firstOrCreate([
                 'name' => $permission,
-                'guard_name' => 'web',
+                'guard_name' => 'sanctum',
             ]);
         }
 
 
-        $customer = Role::firstOrCreate(['name' => 'Customer', 'guard_name' => 'web']);
-        $teller   = Role::firstOrCreate(['name' => 'Teller', 'guard_name' => 'web']);
-        $manager  = Role::firstOrCreate(['name' => 'Manager', 'guard_name' => 'web']);
-        $admin    = Role::firstOrCreate(['name' => 'Admin', 'guard_name' => 'web']);
+        $customer = Role::firstOrCreate(['name' => 'Customer', 'guard_name' => 'sanctum']);
+        $teller   = Role::firstOrCreate(['name' => 'Teller', 'guard_name' => 'sanctum']);
+        $manager  = Role::firstOrCreate(['name' => 'Manager', 'guard_name' => 'sanctum']);
+        $admin    = Role::firstOrCreate(['name' => 'Admin', 'guard_name' => 'sanctum']);
 
 
         $customer->syncPermissions([
@@ -74,6 +74,6 @@ class RolesAndPermissionsSeeder extends Seeder
             'view audit logs',
         ]);
 
-        $admin->syncPermissions(Permission::where('guard_name', 'web')->get());
+        $admin->syncPermissions(Permission::where('guard_name', 'sanctum')->get());
     }
 }
