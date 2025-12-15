@@ -5,6 +5,7 @@ namespace App\Http\Services;
 use App\Http\Repositories\UserAdminRepository;
 use App\Http\Responses\ApiResponse;
 use Illuminate\Support\Facades\Hash;
+use Spatie\Permission\Models\Role;
 
 class UserAdminService
 {
@@ -78,10 +79,19 @@ class UserAdminService
             return ApiResponse::error("User not found", [], 404);
         }
 
+        if (!Role::where('name', $request->role)->exists()) {
+            return ApiResponse::error("Role does not exist", [], 404);
+        }
+
+        if ($user->hasRole($request->role)) {
+            return ApiResponse::error("User already has this role", [], 400);
+        }
+
         $user->assignRole($request->role);
 
         return ApiResponse::success("Role assigned successfully");
     }
+
 
     public function removeRole($request, $id)
     {
@@ -91,8 +101,17 @@ class UserAdminService
             return ApiResponse::error("User not found", [], 404);
         }
 
+        if (empty($request->role)) {
+            return ApiResponse::error("Role is required", [], 422);
+        }
+
+        if (!$user->hasRole($request->role)) {
+            return ApiResponse::error("User does not have this role", [], 400);
+        }
+
         $user->removeRole($request->role);
 
         return ApiResponse::success("Role removed successfully");
     }
+
 }
