@@ -5,97 +5,75 @@ namespace Database\Seeders;
 use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
+use Spatie\Permission\PermissionRegistrar;
 
 class RolesAndPermissionsSeeder extends Seeder
 {
     public function run(): void
     {
-        // Reset old cached permissions
-        app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
 
-        /**
-         * ----------------------------------------------------
-         * 1) Create Permissions
-         * ----------------------------------------------------
-         */
+        app()[PermissionRegistrar::class]->forgetCachedPermissions();
+
+
         $permissions = [
-            // Customer
             'view accounts',
             'view transactions',
             'create support tickets',
             'view notifications',
 
-            // Teller
             'deposit',
             'withdraw',
             'transfer',
             'view customers',
 
-            // Manager
             'approve transactions',
             'freeze account',
             'unfreeze account',
-            'view staff',
-            'manage teller',
             'view audit logs',
 
-            // Admin
+            'manage users',
             'manage roles',
             'manage permissions',
-            'manage users',
-            'system settings',
-            'full access',
+            'system dashboard',
         ];
 
-        foreach ($permissions as $p) {
-            Permission::firstOrCreate(['name' => $p]);
+
+        foreach ($permissions as $permission) {
+            Permission::firstOrCreate([
+                'name' => $permission,
+                'guard_name' => 'sanctum',
+            ]);
         }
 
-        /**
-         * ----------------------------------------------------
-         * 2) Create Roles
-         * ----------------------------------------------------
-         */
-        $customer   = Role::firstOrCreate(['name' => 'Customer']);
-        $teller     = Role::firstOrCreate(['name' => 'Teller']);
-        $manager    = Role::firstOrCreate(['name' => 'Manager']);
-        $admin      = Role::firstOrCreate(['name' => 'Admin']);
 
-        /**
-         * ----------------------------------------------------
-         * 3) Assign Permissions to Roles
-         * ----------------------------------------------------
-         */
+        $customer = Role::firstOrCreate(['name' => 'Customer', 'guard_name' => 'sanctum']);
+        $teller   = Role::firstOrCreate(['name' => 'Teller', 'guard_name' => 'sanctum']);
+        $manager  = Role::firstOrCreate(['name' => 'Manager', 'guard_name' => 'sanctum']);
+        $admin    = Role::firstOrCreate(['name' => 'Admin', 'guard_name' => 'sanctum']);
 
-        // Customer role permissions
-        $customer->givePermissionTo([
+
+        $customer->syncPermissions([
             'view accounts',
             'view transactions',
             'create support tickets',
             'view notifications',
         ]);
 
-        // Teller role permissions
-        $teller->givePermissionTo([
+        $teller->syncPermissions([
             'deposit',
             'withdraw',
             'transfer',
             'view customers',
             'view accounts',
-            'view transactions',
         ]);
 
-        // Manager role permissions
-        $manager->givePermissionTo([
+        $manager->syncPermissions([
             'approve transactions',
             'freeze account',
             'unfreeze account',
-            'view staff',
-            'manage teller',
             'view audit logs',
         ]);
 
-        // Admin role permissions
-        $admin->givePermissionTo(Permission::all()); // Full access to everything
+        $admin->syncPermissions(Permission::where('guard_name', 'sanctum')->get());
     }
 }

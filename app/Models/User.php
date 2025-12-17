@@ -9,7 +9,8 @@ use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable
 {
-    use HasApiTokens, Notifiable,HasApiTokens,HasRoles;
+    use HasRoles,HasApiTokens, Notifiable;
+    protected $guard_name = 'sanctum';
 
     protected $fillable = [
         'name',

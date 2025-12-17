@@ -13,6 +13,8 @@ class AccountStoreRequest extends FormRequest
             'account_type_id' => 'required|exists:account_types,id',
             'parent_id' => 'nullable|exists:accounts,id',
             'balance' => 'nullable|numeric|min:0',
+            'currency' => 'required|in:USD,EUR,SYP,AED,GBP'
+
         ];
     }
 }

@@ -97,9 +97,14 @@ class AuthService
         $user = $this->users->findByEmail($data['email']);
 
         $this->users->update($user, [
-            'name' => $data['name'],
+            'name'     => $data['name'],
             'password' => Hash::make($data['password']),
         ]);
+
+
+        if (!$user->hasRole('Customer')) {
+            $user->assignRole('Customer');
+        }
 
         return true;
     }
