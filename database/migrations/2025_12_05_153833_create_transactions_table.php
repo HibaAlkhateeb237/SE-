@@ -22,6 +22,19 @@ return new class extends Migration
             $table->json('meta')->nullable();
             $table->enum('status', ['pending','authorized','completed','failed','reversed'])->default('pending');
             $table->foreignId('initiated_by')->nullable()->constrained('users')->nullOnDelete();
+
+
+
+                $table->foreignId('related_account_id')
+                    ->nullable()
+                    ->constrained('accounts')
+                    ->nullOnDelete()
+                    ->after('account_id');
+
+
+
+
+
             $table->timestamps();
         });
 
@@ -33,5 +46,10 @@ return new class extends Migration
     public function down(): void
     {
         Schema::dropIfExists('transactions');
+
+        Schema::table('transactions', function (Blueprint $table) {
+            $table->dropForeign(['related_account_id']);
+            $table->dropColumn('related_account_id');
+        });
     }
 };
