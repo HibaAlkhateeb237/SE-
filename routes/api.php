@@ -1,8 +1,10 @@
 <?php
 
+use App\Http\Controllers\AccountFeatureController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\AdminDashboardController;
-use App\Http\Controllers\ReportsController;
+
+use App\Http\Controllers\SupportReportsController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AccountController;
@@ -37,6 +39,7 @@ Route::middleware(['auth:sanctum','role:Customer'])->group(function () {
 
     // Accounts
     Route::get('accounts', [AccountController::class,'index']);
+    Route::get('accounts/{id}/feature', [AccountFeatureController::class,'show']);
     Route::post('accounts', [AccountController::class,'store']);
     Route::get('accounts/{id}', [AccountController::class,'show']);
     Route::post('accounts/{id}/add-child', [AccountController::class,'addChild']);
@@ -103,17 +106,13 @@ Route::middleware(['auth:sanctum','role:Admin'])->group(function () {
 
 
     // ================= Dashboard =================
-    Route::get('/dashboard', [AdminDashboardController::class, 'index'])
+    Route::get('/dashboard', [AdminDashboardController::class, 'stats'])
         ->middleware('permission:system dashboard');
 
 
     // ================= Reports =================
-    Route::get('/reports/daily-transactions', [ReportsController::class, 'dailyTransactions'])
-        ->middleware('permission:view audit logs');
+    Route::get('/reports/daily-transactions', [SupportReportsController::class, 'dailyTransactions']) ->middleware('permission:view audit logs');
+    Route::get('/reports/account-summary', [SupportReportsController::class, 'accountSummary'])   ->middleware('permission:view audit logs');
+    Route::get('/reports/audit-logs', [SupportReportsController::class, 'auditLogs']) ->middleware('permission:view audit logs');
 
-    Route::get('/reports/account-summaries', [ReportsController::class, 'accountSummaries'])
-        ->middleware('permission:view audit logs');
-
-    Route::get('/reports/audit-logs', [ReportsController::class, 'auditLogs'])
-        ->middleware('permission:view audit logs');
 });

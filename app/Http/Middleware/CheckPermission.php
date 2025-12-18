@@ -7,7 +7,8 @@ use Illuminate\Http\Request;
 
 class CheckPermission
 {
-    public function handle( $request, Closure $next,  $permission)
+    public function handle( $request, Closure $next,
+                            $permission)
     {
         if (! $request->user()->can($permission)) {
             return response()->json([
