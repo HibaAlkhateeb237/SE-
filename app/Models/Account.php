@@ -20,7 +20,8 @@ class Account extends Model
         'balance',
         'state',
         'metadata',
-    ];
+        'has_overdraft',
+'is_premium','has_insurance'];
 
     protected $casts = [
         'metadata' => 'array',

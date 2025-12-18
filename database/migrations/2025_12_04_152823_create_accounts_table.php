@@ -21,6 +21,10 @@ return new class extends Migration
             $table->string('currency', 3)->default('USD');
             $table->enum('state', ['active','frozen','suspended','closed'])->default('active');
             $table->json('metadata')->nullable();
+            $table->boolean('has_overdraft')->default(false);
+            $table->boolean('is_premium')->default(false);
+            $table->boolean('has_insurance')->default(false);
+
             $table->timestamps();
 
             $table->foreign('parent_id')->references('id')->on('accounts')->onDelete('set null');
