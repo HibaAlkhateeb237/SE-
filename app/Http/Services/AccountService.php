@@ -3,6 +3,7 @@
 namespace App\Http\Services;
 
 use App\Http\Repositories\AccountRepository;
+use App\Http\Repositories\AccountRepositoryInterface;
 use App\Services\Accounts\AccountComposite;
 use App\Services\Accounts\AccountLeaf;
 use Illuminate\Support\Str;
@@ -11,7 +12,8 @@ use App\Models\Account;
 class AccountService
 {
     public function __construct(
-        protected AccountRepository $accountRepository
+        protected AccountRepository $accountRepository,
+        protected AccountRepositoryInterface $accountRepositoryInterface,
     ) {}
 
     public function listTree()
@@ -108,5 +110,44 @@ class AccountService
 //        // إذا تستخدم Spatie:
 //        return $user->hasRole('Admin');
 //    }
+
+
+
+
+
+
+    public function changeState(int $accountId, string $state): void
+    {
+        $account = $this->accountRepositoryInterface->findId($accountId);
+
+        if (!$account) {
+            throw new \Exception("Account not found");
+        }
+
+        switch ($state) {
+            case 'active':
+                $account->getStateInstance()->activate($account);
+                break;
+            case 'frozen':
+                $account->getStateInstance()->freeze($account);
+                break;
+            case 'suspended':
+                $account->getStateInstance()->suspend($account);
+                break;
+            case 'closed':
+                $account->getStateInstance()->close($account);
+                break;
+        }
+
+        $this->accountRepositoryInterface->save($account);
+    }
+
+
+
+
+
+
+
+
 
 }

@@ -3,6 +3,11 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\States\Account\ActiveState;
+use App\States\Account\FrozenState;
+use App\States\Account\SuspendedState;
+use App\States\Account\ClosedState;
+use App\States\Account\AccountState;
 
 class Account extends Model
 {
@@ -47,4 +52,72 @@ class Account extends Model
     {
         return $this->hasMany(Transaction::class);
     }
+
+
+
+
+
+
+   // private AccountState $stateInstance;
+
+    public function getStateInstance(): AccountState
+    {
+        return match ($this->state) {
+            'active' => new ActiveState(),
+            'frozen' => new FrozenState(),
+            'suspended' => new SuspendedState(),
+            'closed' => new ClosedState(),
+            default     => new ActiveState(),
+        };
+    }
+
+    public function changeState(string $state)
+    {
+        $this->state = $state;
+        $this->save();
+    }
+
+    // Business methods using the State Pattern
+    public function deposit(float $amount)
+    {
+        $this->getStateInstance()->deposit($this, $amount);
+    }
+
+    public function withdraw(float $amount)
+    {
+        $this->getStateInstance()->withdraw($this, $amount);
+    }
+
+    public function freeze()
+    {
+        $this->getStateInstance()->freeze($this);
+    }
+
+    public function activate()
+    {
+        $this->getStateInstance()->activate($this);
+    }
+
+    public function suspend()
+    {
+        $this->getStateInstance()->suspend($this);
+    }
+
+    public function close()
+    {
+        $this->getStateInstance()->close($this);
+    }
+
+
+
+    public function relatedTransactions()
+    {
+        return $this->hasMany(Transaction::class, 'related_account_id');
+    }
+
+
+
+
+
+
 }

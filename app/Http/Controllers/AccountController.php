@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\ChangeAccountStateRequest;
 use App\Http\Services\AccountService;
 use App\Http\Requests\AccountStoreRequest;
 use App\Http\Requests\AddChildRequest;
 use App\Http\Responses\ApiResponse;
 use App\Models\AccountType;
+use Exception;
 
 class AccountController extends Controller
 {
@@ -79,6 +81,36 @@ class AccountController extends Controller
             $types
         );
     }
+
+
+    //--------------------------------------------
+
+
+    public function changeState(ChangeAccountStateRequest $request)
+    {
+        try {
+            $this->accountService->changeState(
+                $request->accountId(),
+                $request->state
+            );
+
+            return ApiResponse::success("Account state updated successfully");
+        } catch (Exception $e) {
+            return ApiResponse::error($e->getMessage(), [], 400);
+        }
+    }
+
+    //--------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
 
 
 }

@@ -4,7 +4,7 @@ namespace App\Http\Repositories;
 
 use App\Models\Account;
 
-class AccountRepository
+class AccountRepository implements AccountRepositoryInterface
 {
     public function getRootAccounts()
     {
@@ -38,4 +38,20 @@ class AccountRepository
         $child->parent_id = $parent->id;
         $child->save();
     }
+
+
+
+
+    public function findId(int $id): ?Account
+    {
+        return Account::find($id);
+    }
+
+    public function save(Account $account): void
+    {
+        $account->save();
+    }
+
+
+
 }

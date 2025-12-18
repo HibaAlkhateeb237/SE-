@@ -15,7 +15,10 @@ class Transaction extends Model
         'meta',
         'status',
         'initiated_by',
+        'related_account_id',
     ];
+
+
 
     protected $casts = [
         'amount' => 'decimal:4',
@@ -31,4 +34,11 @@ class Transaction extends Model
     {
         return $this->belongsTo(User::class, 'initiated_by');
     }
+
+    public function relatedAccount()
+    {
+        return $this->belongsTo(Account::class, 'related_account_id');
+    }
+
+
 }

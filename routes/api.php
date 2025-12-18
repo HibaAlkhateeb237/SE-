@@ -1,15 +1,23 @@
 <?php
 
+
 use App\Http\Controllers\AccountFeatureController;
+
+
+use App\Http\Controllers\TransactionApprovalController;
+use App\Http\Controllers\TransactionController;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
+
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\AdminDashboardController;
 
 use App\Http\Controllers\SupportReportsController;
 use App\Http\Controllers\UserController;
+
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AccountController;
 
-use Illuminate\Support\Facades\Route;
 
 
 
@@ -23,6 +31,8 @@ Route::post('login', [AuthController::class,'login']);
 Route::post('sendOtp',[AuthController::class, 'sendOtp']);
 Route::post('verify-otp', [AuthController::class, 'verifyOtp']);
 
+Route::post('/accounts/{id}/change-state', [AccountController::class, 'changeState']);
+
 
 // -----------------
 // Customer Protected Routes
@@ -30,6 +40,7 @@ Route::post('verify-otp', [AuthController::class, 'verifyOtp']);
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('complete-profile', [AuthController::class, 'completeProfile']);
+
 });
 
 Route::middleware(['auth:sanctum','role:Customer'])->group(function () {
@@ -45,6 +56,23 @@ Route::middleware(['auth:sanctum','role:Customer'])->group(function () {
     Route::post('accounts/{id}/add-child', [AccountController::class,'addChild']);
 
     Route::get('/account-types', [AccountController::class, 'indexType']);
+
+    Route::prefix('transactions')->group(function () {
+        Route::post('deposit', [TransactionController::class, 'deposit']);
+        Route::post('withdraw', [TransactionController::class, 'withdraw']);
+        Route::post('transfer', [TransactionController::class, 'transfer']);
+        Route::get('index', [TransactionController::class, 'index']);
+
+        Route::get('my-transactions', [TransactionApprovalController::class, 'myTransactions']);
+
+        Route::post('{id}/approve', [TransactionApprovalController::class, 'approve']);
+        Route::post('{id}/reject', [TransactionApprovalController::class, 'reject']);
+
+
+
+
+    });
+
 });
 
 

@@ -2,47 +2,64 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+use App\Http\Requests\DepositRequest;
+use App\Http\Requests\WithdrawRequest;
+use App\Http\Requests\TransferRequest;
+use App\Http\Services\TransactionService;
+use App\Http\Responses\ApiResponse;
 
 class TransactionController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+    public function __construct(protected TransactionService $service) {}
+
+    public function deposit(DepositRequest $request)
+    {
+        $transaction = $this->service->deposit(
+            $request->account_id,
+            $request->amount,
+            auth()->id()
+        );
+
+        return ApiResponse::success('Deposit successful', $transaction);
+    }
+
+    public function withdraw(WithdrawRequest $request)
+    {
+        $transaction = $this->service->withdraw(
+            $request->account_id,
+            $request->amount,
+            auth()->id()
+        );
+
+        return ApiResponse::success('Withdraw successful', $transaction);
+    }
+
+    public function transfer(TransferRequest $request)
+    {
+        $transaction = $this->service->transfer(
+            $request->from_account_id,
+            $request->to_account_id,
+            $request->amount,
+            auth()->id()
+        );
+
+        return ApiResponse::success('Transfer successful', $transaction);
+    }
+
     public function index()
     {
-        //
+        return ApiResponse::success(
+            'Transaction history',
+            $this->service->list()
+        );
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        //
-    }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
-    }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
-    }
+
+
+
+
+
 }
