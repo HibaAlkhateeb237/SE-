@@ -1,6 +1,8 @@
 <?php
 
 namespace App\Http\Services;
+use App\Events\Account\BalanceChanged;
+use App\Events\Account\LargeTransactionOccurred;
 use Exception;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
@@ -90,9 +92,24 @@ class TransactionService
         // 🔗 Chain of Responsibility
         $this->depositChain()->handle($account, $amount);
 
+        $oldBalance = $account->balance;
+
         DB::transaction(function () use ($account, $amount) {
             $account->deposit($amount);
         });
+
+
+        event(new BalanceChanged(
+            $account,
+            $oldBalance,
+            $account->balance
+        ));
+
+
+
+        if ($amount >= 10000) {
+            event(new LargeTransactionOccurred($amount, $account->id,'deposit'));
+        }
 
         return $this->transactionRepo->create([
             'tx_id'        => Str::uuid(),
@@ -114,6 +131,8 @@ class TransactionService
     {
         $account = $this->accountRepo->findId($accountId);
 
+        $oldBalance = $account->balance;
+
         try {
         // 🔗 Chain of Responsibility
         $this->withdrawChain()->handle($account, $amount);
@@ -123,11 +142,21 @@ class TransactionService
 
         });
             $status = 'completed';
+
+
+            event(new BalanceChanged(
+                $account,
+                $oldBalance,
+                $account->balance
+            ));
+
+
             }
 
         catch (Exception $e) {
 
             if ($e->getMessage() === 'Manager approval required') {
+
                 $status = 'pending';
             } else {
                 throw $e;
@@ -160,6 +189,10 @@ class TransactionService
         $from = $this->accountRepo->findId($fromAccountId);
         $to   = $this->accountRepo->findId($toAccountId);
 
+        $oldFromBalance = $from->balance;
+        $oldToBalance   = $to->balance;
+
+
         try {
 
 
@@ -171,11 +204,19 @@ class TransactionService
             $to->deposit($amount);
         });
 
-
             $status = 'completed';
+
+
+            event(new BalanceChanged($from, $oldFromBalance, $from->balance));
+            event(new BalanceChanged($to, $oldToBalance, $to->balance));
+
+
+
+
         }catch (Exception $e) {
 
             if ($e->getMessage() === 'Manager approval required') {
+
                 $status = 'pending';
             } else {
                 throw $e;
@@ -217,13 +258,35 @@ class TransactionService
             $this->approvalChain()->handle($account, $tx->amount);
 
             if ($tx->type === 'withdrawal') {
+                $oldBalance = $account->balance;
                 $account->withdraw($tx->amount);
+
+                event(new BalanceChanged($account, $oldBalance, $account->balance));
+
+                if ($tx->amount >= 10000) {
+                    event(new LargeTransactionOccurred($tx->amount, $account->id,'withdrawal'));
+                }
+
             }
 
             if ($tx->type === 'transfer') {
                 $to = $this->accountRepo->findId($tx->related_account_id);
+
+                $oldFromBalance = $account->balance;
                 $account->withdraw($tx->amount);
+                event(new BalanceChanged($account, $oldFromBalance, $account->balance));
+
+                $oldToBalance = $to->balance;
                 $to->deposit($tx->amount);
+                event(new BalanceChanged($to, $oldToBalance, $to->balance));
+
+
+                if ($tx->amount >= 10000) {
+                    event(new LargeTransactionOccurred($tx->amount, $account->id,'transfer',$to->id));
+                    event(new LargeTransactionOccurred($tx->amount, $to->id,'transfer', $account->id));
+                }
+
+
             }
 
             $tx->update([

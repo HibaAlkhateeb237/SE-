@@ -46,7 +46,7 @@ Route::middleware('auth:sanctum')->group(function () {
 Route::middleware(['auth:sanctum','role:Customer'])->group(function () {
 
     Route::post('logout', [AuthController::class,'logout']);
-//    Route::post('complete-profile', [AuthController::class, 'completeProfile']);
+    Route::post('complete-profile', [AuthController::class, 'completeProfile']);
 
     // Accounts
     Route::get('accounts', [AccountController::class,'index']);
@@ -70,7 +70,7 @@ Route::middleware(['auth:sanctum','role:Customer'])->group(function () {
 
     });
 
-    Route::post('complete-profile', [AuthController::class, 'completeProfile']);
+    //Route::post('complete-profile', [AuthController::class, 'completeProfile']);
 
 });
 
