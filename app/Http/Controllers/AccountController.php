@@ -103,6 +103,23 @@ class AccountController extends Controller
     //--------------------------------------------------------------
 
 
+    public function update(AccountUpdateRequest $request, $id)
+    {
+        $account = $this->accountService->update($id, $request->validated());
+
+        if (!$account) {
+            return ApiResponse::error(
+                'Account not found',
+                [],
+                404
+            );
+        }
+
+        return ApiResponse::success(
+            'Account updated successfully',
+            $account
+        );
+    }
 
 
 

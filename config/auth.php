@@ -93,6 +93,12 @@ return [
     | quickly generating a very large amount of password reset tokens.
     |
     */
+    'guards' => [
+        'sanctum' => [
+            'driver' => 'sanctum',
+            'provider' => 'users',
+        ],
+    ],
 
     'passwords' => [
         'users' => [
@@ -115,5 +121,8 @@ return [
     */
 
     'password_timeout' => env('AUTH_PASSWORD_TIMEOUT', 10800),
+    'defaults' => [
+        'guard' => 'sanctum',
+    ],
 
 ];
