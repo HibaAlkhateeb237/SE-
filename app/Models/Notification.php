@@ -13,6 +13,7 @@ class Notification extends Model
         'body',
         'meta',
         'read',
+        'type',
     ];
 
     protected $casts = [

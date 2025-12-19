@@ -38,10 +38,17 @@ Route::post('/accounts/{id}/change-state', [AccountController::class, 'changeSta
 // Customer Protected Routes
 // -----------------
 
+
 //Route::middleware('auth:sanctum')->group(function () {
 //    Route::post('complete-profile', [AuthController::class, 'completeProfile']);
 //
 //});
+
+Route::middleware('auth:sanctum')->group(function () {
+
+
+});
+
 
 Route::middleware(['auth:sanctum','role:Customer'])->group(function () {
 
@@ -68,10 +75,9 @@ Route::middleware(['auth:sanctum','role:Customer'])->group(function () {
         Route::post('{id}/approve', [TransactionApprovalController::class, 'approve']);
         Route::post('{id}/reject', [TransactionApprovalController::class, 'reject']);
 
-
-
-
     });
+
+    //Route::post('complete-profile', [AuthController::class, 'completeProfile']);
 
 });
 

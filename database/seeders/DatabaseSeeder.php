@@ -14,7 +14,7 @@ class DatabaseSeeder extends Seeder
             UsersSeeder::class,
             AccountsSeeder::class,
             TransactionsSeeder::class,
-            NotificationsSeeder::class,
+           // NotificationsSeeder::class,
             AuditLogsSeeder::class,
             SupportTicketsSeeder::class,
             AdminUserSeeder::class,

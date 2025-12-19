@@ -83,10 +83,20 @@ class AuthService
             'otp_expires_at' => null,
         ]);
 
+
                 if (!$user->hasRole('Customer')) {
             $user->assignRole('Customer');
         }
+
+
+        if (!$user->hasRole('Customer')) {
+            $user->assignRole('Customer');
+        }
+
+
+
         $token = $user->createToken('auth_token')->plainTextToken;
+
 
         return compact( 'token');
 
@@ -105,9 +115,13 @@ class AuthService
         ]);
 
 
+
 //        if (!$user->hasRole('Customer')) {
 //            $user->assignRole('Customer');
 //        }
+
+
+
 
         return true;
     }
